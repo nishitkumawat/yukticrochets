@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import {
+  databases,
+  DB_ID,
+  PRODUCTS_COLLECTION_ID,
+  CATEGORIES_COLLECTION_ID,
+} from "../services/appwrite";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -8,30 +14,32 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [categories, setCategories] = useState([]);
 
+  // Modal and buy-state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeProduct, setActiveProduct] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [customization, setCustomization] = useState("");
+
+  const phone = import.meta.env.VITE_WHATSAPP_NUMBER;
+
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
-        const read = (key) => {
-          try {
-            const raw = localStorage.getItem(key);
-            return raw ? JSON.parse(raw) : [];
-          } catch {
-            return [];
-          }
-        };
+        const [prodsRes, catsRes] = await Promise.all([
+          databases.listDocuments(DB_ID, PRODUCTS_COLLECTION_ID),
+          databases.listDocuments(DB_ID, CATEGORIES_COLLECTION_ID),
+        ]);
 
-        const localProducts = read("__admin_products__");
-        const localCategories = read("__admin_categories__");
-
-        // Sort products by createdAt desc if present
-        localProducts.sort((a, b) => {
-          const ta = new Date(a.createdAt || 0).getTime();
-          const tb = new Date(b.createdAt || 0).getTime();
+        const docs = prodsRes.documents.slice().sort((a, b) => {
+          const ta = new Date(a.createdAt || a.$createdAt || 0).getTime();
+          const tb = new Date(b.createdAt || b.$createdAt || 0).getTime();
           return tb - ta;
         });
 
-        setProducts(localProducts);
-        setCategories(localCategories);
+        setProducts(docs);
+        setCategories(catsRes.documents);
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -44,7 +52,7 @@ export default function Products() {
   const filteredProducts =
     selectedCategory === "all"
       ? products
-      : products.filter((product) => product.category === selectedCategory);
+      : products.filter((product) => product.category_id === selectedCategory);
 
   const ImageSlider = ({ images, productId }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -180,10 +188,10 @@ export default function Products() {
         </button>
         {categories.map((category) => (
           <button
-            key={category.id}
-            onClick={() => setSelectedCategory(category.id)}
+            key={category.$id}
+            onClick={() => setSelectedCategory(category.$id)}
             className={`px-4 py-2 rounded-full border transition-all ${
-              selectedCategory === category.id
+              selectedCategory === category.$id
                 ? "bg-tan text-white border-tan"
                 : "bg-white text-brown border-tan hover:bg-beige"
             }`}
@@ -218,17 +226,18 @@ export default function Products() {
         >
           {filteredProducts.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product.$id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -4 }}
-              className=" rounded-2xl shadow-luxe p-5 hover:shadow-luxe-lg transition-all duration-300 group"
+              className=" rounded-2xl shadow-luxe p-5 hover:shadow-luxe-lg transition-all duration-300 group cursor-pointer"
+              onClick={() => openProductModal(product)}
             >
               <div className="aspect-square rounded-xl  overflow-hidden relative mb-4 border border-tan">
                 <ImageSlider
-                  images={product.imageUrls || [product.imageUrl]}
-                  productId={product.id}
+                  images={product.images || []}
+                  productId={product.$id}
                 />
               </div>
 
@@ -249,10 +258,12 @@ export default function Products() {
                   {product.description}
                 </p>
 
-                {product.category && (
+                {product.category_id && (
                   <span className="inline-block px-2 py-1 text-xs bg-tan/10 text-tan rounded-full">
-                    {categories.find((cat) => cat.id === product.category)
-                      ?.name || product.category}
+                    {categories.find((cat) => cat.$id === product.category_id)
+                      ?.name ||
+                      product.category_name ||
+                      product.category_id}
                   </span>
                 )}
               </div>
@@ -273,6 +284,119 @@ export default function Products() {
           </h3>
           <p className="text-brown/60">Try selecting a different category</p>
         </motion.div>
+      )}
+
+      {/* Modal for product gallery and Buy flow */}
+      {modalOpen && activeProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl max-w-3xl w-full shadow-luxe p-6 relative">
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute top-3 right-3 text-brown/60 hover:text-brown"
+            >
+              ✕
+            </button>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="relative aspect-square rounded-xl overflow-hidden border border-tan">
+                {activeProduct.images && activeProduct.images.length > 0 ? (
+                  <>
+                    <img
+                      src={activeProduct.images[activeImageIndex]}
+                      alt={activeProduct.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {activeProduct.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setActiveImageIndex((prev) =>
+                              (prev - 1 + activeProduct.images.length) %
+                              activeProduct.images.length
+                            )
+                          }
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white text-brown border border-tan/40 rounded-full p-1 hover:bg-beige/80 transition-colors shadow"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          onClick={() =>
+                            setActiveImageIndex((prev) =>
+                              (prev + 1) % activeProduct.images.length
+                            )
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-brown border border-tan/40 rounded-full p-1 hover:bg-beige/80 transition-colors shadow"
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-brown/40">
+                    No Image
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-serif text-2xl font-light text-brown">
+                  {activeProduct.name}
+                </h3>
+                <p className="text-brown/70 text-sm leading-relaxed">
+                  {activeProduct.description}
+                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-tan font-bold text-xl">
+                    ₹{activeProduct.price}
+                  </span>
+                  {activeProduct.category_id && (
+                    <span className="inline-block px-2 py-1 text-xs bg-tan/10 text-tan rounded-full">
+                      {categories.find(
+                        (cat) => cat.$id === activeProduct.category_id
+                      )?.name ||
+                        activeProduct.category_name ||
+                        activeProduct.category_id}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 mt-4">
+                  <label className="text-sm text-brown/80">Quantity</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={quantity}
+                    onChange={(e) =>
+                      setQuantity(Math.max(1, Number(e.target.value) || 1))
+                    }
+                    className="w-20 border border-tan/40 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tan/50 focus:border-tan text-sm"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-brown/80 mb-1">
+                    Customization (optional)
+                  </label>
+                  <textarea
+                    value={customization}
+                    onChange={(e) => setCustomization(e.target.value)}
+                    rows={3}
+                    className="w-full border border-tan/30 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-tan/50 focus:border-tan text-sm"
+                    placeholder="Mention colors, sizes, or any special request"
+                  />
+                </div>
+
+                <button
+                  onClick={handleBuy}
+                  className="mt-4 w-full bg-tan text-white rounded-xl px-4 py-3 font-medium hover:bg-tan/90 transition-colors"
+                >
+                  Buy on WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

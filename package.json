@@ -12,6 +12,7 @@
   "dependencies": {
     "@appwrite.io/pink-icons": "^1.0.0",
     "@tailwindcss/vite": "^4.0.14",
+    "aos": "^2.3.4",
     "appwrite": "^17.0.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.546.0",

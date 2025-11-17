@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 import { motion } from "framer-motion";
+import { account } from "../services/appwrite";
 
 export default function AdminLogin() {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,10 +15,22 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
-      navigate("/admin", { replace: true });
+      // Create an Appwrite email/password session for the admin user.
+      await account.createEmailPasswordSession(email, password);
+
+      // Optional: restrict access to a single admin email configured in env.
+      const adminEmail = import.meta.env.REACT_APP_ADMIN_EMAIL;
+      if (adminEmail && email !== adminEmail) {
+        await account.deleteSessions();
+        throw new Error(
+          "This account is not allowed to access the admin dashboard."
+        );
+      }
+
+      // Redirect to the protected admin dashboard route.
+      navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      setError(err?.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }

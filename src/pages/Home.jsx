@@ -1,160 +1,181 @@
-// LandingPage.jsx
-import React from "react";
 import { motion } from "framer-motion";
-import { Home, ShoppingBag, Mail } from "lucide-react";
-import Navbar from "../components/Navbar";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
-const products = [
-  { id: 1, name: "Crochet Bag", image: "/images/product1.jpg" },
-  { id: 2, name: "Crochet Hat", image: "/images/product2.jpg" },
-  { id: 3, name: "Crochet Scarf", image: "/images/product3.jpg" },
-  { id: 4, name: "Crochet Doll", image: "/images/product4.jpg" },
-];
+export default function LandingPage() {
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
 
-const highlights = [
-  { id: 1, text: "Handmade with Love", image: "/images/highlight1.jpg" },
-  { id: 2, text: "Premium Quality Materials", image: "/images/highlight2.jpg" },
-  { id: 3, text: "Unique Designs", image: "/images/highlight3.jpg" },
-];
+  // Placeholder product images
+  const products = [
+    {
+      name: "Crochet Bag",
+      img: "https://source.unsplash.com/400x400/?crochet,bag",
+    },
+    {
+      name: "Handmade Scarf",
+      img: "https://source.unsplash.com/400x400/?crochet,scarf",
+    },
+    {
+      name: "Crochet Hat",
+      img: "https://source.unsplash.com/400x400/?crochet,hat",
+    },
+  ];
 
-const LandingPage = () => {
   return (
-    <div className="font-sans bg-[#F5EBDD] text-[#4B382A]">
-      {/* Navbar */}
-
+    <div className="bg-[#F5EBDD] text-[#4B382A] font-sans overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative flex flex-col md:flex-row items-center justify-between px-8 py-20 md:py-32 overflow-hidden">
-        {/* Left Semi-Circle */}
-        <motion.div
-          initial={{ x: -300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+      <section className="min-h-screen flex flex-col justify-center items-center text-center px-4">
+        <motion.h1
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1 }}
-          className="bg-[#E6D5B8] w-[500px] h-[500px] rounded-l-full absolute left-0 top-1/4 md:top-1/3 -z-10"
-        />
-        {/* Left Text */}
-        <motion.div
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 1.2 }}
-          className="md:w-1/2 z-10"
+          className="text-5xl md:text-7xl font-serif mb-4"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Welcome to Yukti Crochets
-          </h2>
-          <p className="text-lg md:text-xl mb-6">
-            Handcrafted crochet products made with love and care. Explore unique
-            designs and premium quality that add warmth and charm to your
-            lifestyle.
-          </p>
-        </motion.div>
-        {/* Right Circle Image */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="md:w-1/2 flex justify-center"
+          Yukti Crochets
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="text-lg md:text-xl max-w-xl mb-10"
         >
-          <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden shadow-xl">
-            <img
-              src="/images/hero.jpg"
-              alt="Crochet Highlight"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </motion.div>
-      </section>
+          Handcrafted crochet pieces made with love and care. Explore our unique
+          collection of handmade accessories.
+        </motion.p>
 
-      {/* Decorative thread strip */}
-      <div className="w-full h-16 bg-white relative">
-        <svg
-          className="absolute top-0 left-0 w-full h-full"
-          viewBox="0 0 1440 320"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill="#E6D5B8"
-            d="M0,128L40,144C80,160,160,192,240,208C320,224,400,224,480,218.7C560,213,640,203,720,197.3C800,192,880,192,960,197.3C1040,203,1120,213,1200,197.3C1280,181,1360,139,1400,117.3L1440,96L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
-          />
-        </svg>
-      </div>
+        {/* SVG / PNG Thread & Ball */}
+        <motion.img
+          src="https://www.svgrepo.com/show/354365/crochet.svg" // Example placeholder
+          alt="Crochet thread and ball"
+          className="w-48 h-48 md:w-64 md:h-64 mb-12"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.2, delay: 1.5 }}
+        />
+      </section>
 
       {/* Products Section */}
-      <section className="px-8 py-20 md:py-32">
-        <h3 className="text-3xl font-bold text-center mb-12">
-          Our Featured Products
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <motion.div
-              key={product.id}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer"
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-64 object-cover"
-              />
-              <div className="p-4 text-center font-semibold">
-                {product.name}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Highlights Section */}
-      <section className="bg-white px-8 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-          {highlights.map((highlight) => (
-            <motion.div
-              key={highlight.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
+      <section className="px-4 md:px-20 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {products.map((product, idx) => (
+          <motion.div
+            key={product.name}
+            data-aos="fade-up"
+            whileHover={{ scale: 1.05 }}
+            className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer"
+          >
+            <motion.img
+              src={product.img}
+              alt={product.name}
+              className="w-full h-64 object-cover"
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="flex flex-col items-center text-center p-4"
-            >
-              <img
-                src={highlight.image}
-                alt={highlight.text}
-                className="w-32 h-32 object-cover rounded-full mb-4 shadow-md"
-              />
-              <p className="text-lg font-medium">{highlight.text}</p>
-            </motion.div>
-          ))}
+              transition={{ duration: 0.8, delay: idx * 0.2 }}
+            />
+            <div className="p-4 text-center font-semibold">{product.name}</div>
+          </motion.div>
+        ))}
+      </section>
+
+      {/* Articles Section */}
+      <section className="px-4 md:px-20 py-16 space-y-16">
+        {/* Article 1 */}
+        <div
+          className="flex flex-col md:flex-row items-center gap-8"
+          data-aos="fade-right"
+        >
+          <div className="md:w-1/2">
+            <h2 className="text-2xl font-serif mb-4">The Art of Crochet</h2>
+            <p className="text-[#4B382A]/80">
+              Discover how each piece is handcrafted with attention to detail
+              and a personal touch. Crochet is not just art, it's love.
+            </p>
+          </div>
+          <div className="md:w-1/2">
+            <img
+              src="https://source.unsplash.com/600x400/?crochet,art"
+              alt="Crochet Art"
+              className="rounded-xl shadow-lg"
+            />
+          </div>
+        </div>
+
+        {/* Article 2 */}
+        <div
+          className="flex flex-col md:flex-row-reverse items-center gap-8"
+          data-aos="fade-left"
+        >
+          <div className="md:w-1/2">
+            <h2 className="text-2xl font-serif mb-4">
+              Unique Handmade Accessories
+            </h2>
+            <p className="text-[#4B382A]/80">
+              Our collection includes bags, scarves, hats and more, all made
+              with care and attention to detail.
+            </p>
+          </div>
+          <div className="md:w-1/2">
+            <img
+              src="https://source.unsplash.com/600x400/?crochet,accessories"
+              alt="Crochet Accessories"
+              className="rounded-xl shadow-lg"
+            />
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="px-8 py-20 text-center">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          className="bg-[#A47C5B] text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg"
-        >
-          Explore All Products
-        </motion.button>
+      {/* View All Products Button */}
+      <div className="text-center py-10">
+        <button className="bg-[#4B382A] text-[#F5EBDD] px-8 py-3 rounded-full font-semibold hover:bg-[#382A20] transition">
+          View All Products
+        </button>
+      </div>
+
+      {/* Quote / Testimonials Section */}
+      <section className="py-16 bg-[#EDE6D9]">
+        <div className="text-center mb-10">
+          <h3 className="text-3xl font-serif">We Love Good Compliments</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 md:px-20">
+          {[
+            {
+              text: "More than expected crazy soft, flexible and best fitted.",
+              title: "Casual Way",
+            },
+            {
+              text: "Best fitted white denim shirt more than expected crazy soft.",
+              title: "Uptop",
+            },
+            {
+              text: "Flexible crazy soft, best fitted and stylish.",
+              title: "Denim Craze",
+            },
+            {
+              text: "Best quality crochet products, highly recommended.",
+              title: "Handmade Love",
+            },
+          ].map((item, idx) => (
+            <motion.div
+              key={idx}
+              className="bg-white p-6 rounded-xl shadow-lg text-center"
+              data-aos="zoom-in"
+            >
+              <blockquote className="text-sm text-[#4B382A]/80 mb-4">
+                “{item.text}”
+              </blockquote>
+              <div className="font-semibold uppercase">{item.title}</div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#4B382A] text-white py-12 px-8">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <p>© 2025 Yukti Crochets. All rights reserved.</p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-[#E6D5B8]">
-              Instagram
-            </a>
-            <a href="#" className="hover:text-[#E6D5B8]">
-              Facebook
-            </a>
-            <a href="#" className="hover:text-[#E6D5B8]">
-              Pinterest
-            </a>
-          </div>
-        </div>
+      <footer className="bg-[#4B382A] text-[#F5EBDD] py-6 text-center">
+        &copy; {new Date().getFullYear()} Yukti Crochets. All rights reserved.
       </footer>
     </div>
   );
-};
-
-export default LandingPage;
+}
