@@ -14,7 +14,18 @@ const categoriesCollectionId = import.meta.env.REACT_APP_CATEGORIES_COLLECTION_I
 const imagesBucketId = import.meta.env.REACT_APP_IMAGES_BUCKET_ID;
 
 // Initialize a single Appwrite client instance.
-const client = new Client().setEndpoint(endpoint).setProject(projectId);
+// Be defensive in case environment variables are missing so we don't
+// throw at import time; instead, log a clear warning.
+const client = new Client();
+
+if (!endpoint || !projectId) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "Appwrite endpoint or project ID is not configured. Check your .env file."
+  );
+} else {
+  client.setEndpoint(endpoint).setProject(projectId);
+}
 
 // Export Appwrite SDK clients to reuse across the app.
 export const account = new Account(client);
@@ -34,6 +45,6 @@ export const generateId = () => ID.unique();
 // Assumes the bucket has public read permissions (read: role:all).
 export const buildPublicFileUrl = (fileId) => {
   if (!endpoint || !imagesBucketId || !projectId) return "";
-  const baseUrl = endpoint.replace("/v1", "");
+  const baseUrl = String(endpoint).replace("/v1", "");
   return `${baseUrl}/storage/buckets/${imagesBucketId}/files/${fileId}/view?project=${projectId}`;
 };
