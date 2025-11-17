@@ -40,10 +40,10 @@ export default function ProductsManager() {
         databases.listDocuments(DB_ID, CATEGORIES_COLLECTION_ID),
       ]);
 
-      // Sort products by created date (newest first).
+      // Sort products by Appwrite's $createdAt (newest first).
       const docs = productsRes.documents.slice().sort((a, b) => {
-        const ta = new Date(a.createdAt || a.$createdAt || 0).getTime();
-        const tb = new Date(b.createdAt || b.$createdAt || 0).getTime();
+        const ta = new Date(a.$createdAt || 0).getTime();
+        const tb = new Date(b.$createdAt || 0).getTime();
         return tb - ta;
       });
 
@@ -100,8 +100,9 @@ export default function ProductsManager() {
     setError("");
     try {
       const imageUrls = await uploadImages(productForm.imageFiles);
-      const category = categories.find((c) => c.$id === productForm.categoryId);
 
+      // Create the product document using the schema:
+      // $id, name, price, category_id, images, description, $createdAt, $updatedAt.
       await databases.createDocument(
         DB_ID,
         PRODUCTS_COLLECTION_ID,
@@ -111,9 +112,7 @@ export default function ProductsManager() {
           price: Number(productForm.price),
           description: productForm.description.trim(),
           category_id: productForm.categoryId,
-          category_name: category?.name || "",
           images: imageUrls,
-          createdAt: new Date().toISOString(),
         }
       );
 
@@ -277,9 +276,11 @@ export default function ProductsManager() {
                 <span className="text-tan font-bold mt-1">
                   ₹{product.price}
                 </span>
-                {product.category_name && (
+                {product.category_id && (
                   <span className="inline-block bg-tan/20 text-tan px-2 py-1 rounded-full text-xs mt-1">
-                    {product.category_name}
+                    {categories.find((cat) => cat.$id === product.category_id)
+                      ?.name ||
+                      product.category_id}
                   </span>
                 )}
                 <button

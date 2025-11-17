@@ -19,7 +19,7 @@ export default function AdminLogin() {
       await account.createEmailPasswordSession(email, password);
 
       // Optional: restrict access to a single admin email configured in env.
-      const adminEmail = import.meta.env.REACT_APP_ADMIN_EMAIL;
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
       if (adminEmail && email !== adminEmail) {
         await account.deleteSessions();
         throw new Error(

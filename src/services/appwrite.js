@@ -4,14 +4,13 @@
 
 import { Client, Account, Databases, ID, Storage } from "appwrite";
 
-// Env variables, using the existing REACT_APP_* names from the user's .env.
-// Vite is configured with envPrefix to expose both VITE_ and REACT_APP_.
-const endpoint = import.meta.env.REACT_APP_APPWRITE_ENDPOINT;
-const projectId = import.meta.env.REACT_APP_APPWRITE_PROJECT;
-const databaseId = import.meta.env.REACT_APP_DATABASE_ID;
-const productsCollectionId = import.meta.env.REACT_APP_PRODUCTS_COLLECTION_ID;
-const categoriesCollectionId = import.meta.env.REACT_APP_CATEGORIES_COLLECTION_ID;
-const imagesBucketId = import.meta.env.REACT_APP_IMAGES_BUCKET_ID;
+// Env variables, using the VITE_* names from the user's .env.
+const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT;
+const projectId = import.meta.env.VITE_APPWRITE_PROJECT;
+const databaseId = import.meta.env.VITE_DATABASE_ID;
+const productsCollectionId = import.meta.env.VITE_PRODUCTS_COLLECTION_ID;
+const categoriesCollectionId = import.meta.env.VITE_CATEGORIES_COLLECTION_ID;
+const imagesBucketId = import.meta.env.VITE_IMAGES_BUCKET_ID;
 
 // Initialize a single Appwrite client instance.
 // Be defensive in case environment variables are missing so we don't
